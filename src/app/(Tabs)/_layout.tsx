@@ -5,9 +5,15 @@ export default function RootLayout() {
     return (
         <Tabs>
             <Tabs.Screen
-                name="index"
+                name="(Medications)/index"
                 options={{
                     title: 'Tab 1',
+                }}
+            />
+            <Tabs.Screen
+                name="Chat/index"
+                options={{
+                    title: 'Tab 2',
                 }}
             />
         </Tabs>
