@@ -1,0 +1,7 @@
+node_modules
+assets
+scripts
+babel.config.js
+declarations.d.ts
+metro.config.js
+tailwind.config.js
