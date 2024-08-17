@@ -1,10 +1,12 @@
 import { openFDAClient } from '../util/API';
 import { useMedicationsContext } from '../context/MedicationsContext';
-import { MedicationData, MedicationSummary, SearchMedicationInfo } from '../types/Medication';
+import { MedicationData, SearchMedicationInfo } from '../types/Medication';
 import { useState } from 'react';
 import axios from 'axios';
-import { sendMessageToChatGPT } from '../util/LLM';
 import { Alert } from 'react-native';
+import { summarizeJSON } from '../util/Services/Summarize';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 export const useMedications = () => {
     const { medicationsList, setMedicationsList } = useMedicationsContext();
@@ -43,13 +45,22 @@ export const useMedications = () => {
 
     const searchByUPC = async (upcNumber: string) => {
         try {
+            console.log(upcNumber);
+
             const response = await openFDAClient.get('/', {
                 params: {
                     search: `openfda.upc.exact:${upcNumber}`,
                 },
             });
 
-            return response.data.results[0];
+            const result = response.data.results[0];
+
+            const item: SearchMedicationInfo = {
+                brand_name: result.openfda.brand_name[0],
+                ndc_number: result.openfda.product_ndc[0],
+            };
+
+            return item;
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 404) {
                 Alert.alert('Product Not Found', 'Please try again.');
@@ -102,19 +113,18 @@ export const useMedications = () => {
 
             const results = response.data.results;
 
-            const summaryPrompt = `Summarize this data into a JSON string with 6 categories that contains only text: 
+            const summaryPrompt = `Summarize this data into a single JSON object, no name, with 7 categories that contains only text in layman-terms, 
             {
-                contraindictions,
+                contraindications,
                 mechanism_of_action,
                 description,
                 drug_interactions,
                 storage_and_handling,
                 information_for_patients,
+                common_side_effects
             }
-            ${JSON.stringify(results)}
-            
-            Only give me a JSON`;
-            const reply = await sendMessageToChatGPT(summaryPrompt);
+            ${JSON.stringify(results)}`;
+            const reply = await summarizeJSON(summaryPrompt);
             console.log(reply);
 
             const medication: MedicationData = {
@@ -141,6 +151,10 @@ export const useMedications = () => {
         setMedicationsList(updatedList || null);
     };
 
+    const createMedPrompt = (text: string) => {
+        return text + medicationsList?.map(({ brand_name }) => brand_name).join(', ');
+    };
+
     return {
         searchByNDC,
         searchByUPC,
@@ -150,5 +164,6 @@ export const useMedications = () => {
         setSearchList,
         deleteMedication,
         isLoading,
+        createMedPrompt,
     };
 };

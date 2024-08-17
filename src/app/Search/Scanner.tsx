@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet, Button, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    Button,
+    TouchableOpacity,
+    ActivityIndicator,
+    Alert,
+} from 'react-native';
 import { useCameraPermissions, CameraView, CameraType } from 'expo-camera';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useMedications } from '@/src/hooks/useMedications';
+import { SearchMedicationInfo } from '@/src/types/Medication';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function Scanner() {
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
     const [scanned, setScanned] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const [permission, requestPermission] = useCameraPermissions();
     const [facing, setFacing] = useState<CameraType>('back');
-    const { searchByUPC } = useMedications();
+    const { searchByUPC, addMedication } = useMedications();
 
     if (!permission) {
         // Camera permissions are still loading.
@@ -22,10 +33,21 @@ export default function Scanner() {
         setFacing((current) => (current === 'back' ? 'front' : 'back'));
     }
 
-    const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+    const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
         setScanned(true);
-        alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-        searchByUPC(data);
+        setLoading(true);
+        const item: SearchMedicationInfo | undefined = await searchByUPC('0' + data);
+
+        if (!item) {
+            return;
+        }
+
+        const medicationAdded = await addMedication(item.ndc_number);
+
+        if (medicationAdded) {
+            Alert.alert(`${item.brand_name} has been added to your list!`);
+            setLoading(false);
+        }
     };
 
     const handleExit = () => {
@@ -38,34 +60,26 @@ export default function Scanner() {
                 style={StyleSheet.absoluteFillObject}
                 onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
                 barcodeScannerSettings={{
-                    barcodeTypes: [
-                        'aztec',
-                        'ean13',
-                        'ean8',
-                        'qr',
-                        'pdf417',
-                        'upc_e',
-                        'datamatrix',
-                        'code39',
-                        'code93',
-                        'itf14',
-                        'codabar',
-                        'code128',
-                        'upc_a',
-                    ],
+                    barcodeTypes: ['upc_a'],
                     // 'aztec' | 'ean13' | 'ean8' | 'qr' | 'pdf417' | 'upc_e' | 'datamatrix' | 'code39' | 'code93' | 'itf14' | 'codabar' | 'code128' | 'upc_a'
                 }}
                 facing={facing}
             >
-                <View className="flex-row px-5 absolute bottom-0 w-[100%] h-[20%] bg-black/50 self-center justify-between items-center">
-                    <TouchableOpacity className="" onPress={handleExit}>
-                        <Text className="text-white">Cancel</Text>
+                <View className="flex-row px-10 absolute bottom-0 w-[100%] h-[20%] bg-black/50 self-center justify-between items-center">
+                    <TouchableOpacity onPress={handleExit}>
+                        <MaterialIcons name="close" size={30} color="white" />
                     </TouchableOpacity>
-                    <View className="w-12 h-12 justify-center items-center">
-                        {scanned ? (
-                            <FontAwesome name="check" size={24} color="#C23B22" />
+                    <View className="w-15 h-15 justify-center items-center">
+                        {scanned && !loading ? (
+                            <>
+                                <FontAwesome name="check" size={24} color="#C23B22" />
+                                <Text className="text-white mt-1">Scanned!</Text>
+                            </>
                         ) : (
-                            <ActivityIndicator size="large" color="#C23B22" />
+                            <>
+                                <ActivityIndicator size="large" color="#C23B22" />
+                                <Text className="text-white mt-1">Scanning...</Text>
+                            </>
                         )}
                     </View>
                     <View>
@@ -75,7 +89,20 @@ export default function Scanner() {
                     </View>
                 </View>
             </CameraView>
-            {scanned && <Button title="Tap to Scan Again" onPress={() => setScanned(false)} />}
+            {loading && (
+                <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-black/50">
+                    <ActivityIndicator size="large" color="#ffffff" />
+                    <Text className="mt-5 text-white">Summarizing Medication...</Text>
+                </View>
+            )}
+            {scanned && !loading && (
+                <TouchableOpacity
+                    onPress={() => setScanned(false)}
+                    className="bg-white py-5 px-5 rounded items-center self-center"
+                >
+                    <Text className="font-bold">Scan Again</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 }

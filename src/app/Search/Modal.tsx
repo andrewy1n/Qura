@@ -20,6 +20,7 @@ export default function Modal() {
     const [searchQuery, setSearchQuery] = useState('');
     const prevQueryRef = useRef(searchQuery);
     const [loading, setLoading] = useState(false);
+    const [confirm, setConfirm] = useState(false);
     const { searchByNDC, searchByName, addMedication, searchList, isLoading } = useMedications();
 
     useEffect(() => {
@@ -51,6 +52,8 @@ export default function Modal() {
             try {
                 const medicineAdded = await addMedication(item.ndc_number);
                 if (medicineAdded) {
+                    setConfirm(true);
+                    setTimeout(() => setConfirm(false), 2000);
                     // Handle success if needed
                 }
             } catch (error) {
@@ -104,6 +107,13 @@ export default function Modal() {
                 <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-white/50">
                     <ActivityIndicator size="large" color="#000000" />
                     <Text className="mt-5">Summarizing Medication...</Text>
+                </View>
+            )}
+
+            {confirm && (
+                <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-white/50">
+                    <FontAwesome name="check" size={24} color="#000000" />
+                    <Text className="mt-5">Added to List!</Text>
                 </View>
             )}
 

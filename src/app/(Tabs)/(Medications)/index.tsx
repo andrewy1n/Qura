@@ -13,10 +13,6 @@ export default function Index() {
     const { searchByNDC } = useMedications();
     const { medicationsList, setMedicationsList } = useMedicationsContext();
 
-    const testSearch = () => {
-        searchByNDC('0777-3105-02');
-    };
-
     const handleOpenModal = () => {
         router.push('/Search/Modal');
     };
@@ -74,17 +70,21 @@ export default function Index() {
             </View>
             <View className="flex-1 w-full">
                 <FlatList
-                    className="p-5 w-full"
+                    className="w-full"
                     data={medicationsList}
                     keyExtractor={(item) => item.ndc_number}
                     renderItem={({ index }) => <Medication medicationIndex={index} edit={edit} />}
-                    ItemSeparatorComponent={() => <View className="h-5" />}
+                    ItemSeparatorComponent={() => <View className="h-3" />}
+                    contentContainerStyle={{
+                        paddingBottom: 110,
+                        paddingTop: 20,
+                        paddingHorizontal: 20,
+                    }}
                 />
             </View>
-
             <TouchableOpacity
                 onPress={handleOpenModal}
-                className="absolute bottom-[10%] right-5 w-16 h-16 bg-black rounded-full justify-center items-center shadow-lg"
+                className="absolute bottom-[10%] right-[3%] w-16 h-16 bg-black rounded-full justify-center items-center shadow-lg"
             >
                 <Text className="text-white text-2xl font-bold"> + </Text>
             </TouchableOpacity>

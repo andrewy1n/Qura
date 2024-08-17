@@ -5,12 +5,13 @@ export interface MedicationData {
 }
 
 export interface MedicationSummary {
-    contraindictions: string;
+    contraindications: string;
     mechanism_of_action: string;
     description: string;
     drug_interactions: string;
     storage_and_handling: string;
     information_for_patients: string;
+    common_side_effects: string;
 }
 
 export interface SearchMedicationInfo {

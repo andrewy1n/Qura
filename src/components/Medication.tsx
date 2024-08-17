@@ -4,6 +4,8 @@ import { useMedicationsContext } from '../context/MedicationsContext';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useMedications } from '@/src/hooks/useMedications';
+import { useChat } from '../hooks/useChat';
+import { router } from 'expo-router';
 
 interface PostProps {
     medicationIndex: number;
@@ -13,7 +15,8 @@ interface PostProps {
 const Medication: React.FC<PostProps> = ({ medicationIndex, edit }) => {
     const [expand, setExpand] = useState(false);
     const { medicationsList } = useMedicationsContext();
-    const { deleteMedication } = useMedications();
+    const { sendMessage } = useChat();
+    const { deleteMedication, createMedPrompt } = useMedications();
     const rotateAnim = useState(new Animated.Value(0))[0]; // Initial rotation value
 
     if (!medicationsList) {
@@ -58,6 +61,16 @@ const Medication: React.FC<PostProps> = ({ medicationIndex, edit }) => {
             ],
             { cancelable: true }
         );
+    };
+
+    const handleSummary = () => {
+        sendMessage(`Give me a summary of ${medication.brand_name}`);
+        router.push('/Chat');
+    };
+
+    const handleSentiment = () => {
+        sendMessage(`Give me the internet's general sentiment about ${medication.brand_name}`);
+        router.push('/Chat');
     };
 
     return (
@@ -111,15 +124,15 @@ const Medication: React.FC<PostProps> = ({ medicationIndex, edit }) => {
                             <View>
                                 <Text className="text-black font-bold">Common Side Effects</Text>
                                 <Text className="text-black">
-                                    {medication.summary.contraindictions}
+                                    {medication.summary.common_side_effects}
                                 </Text>
                             </View>
                             <View>
                                 <Text className="text-black font-bold">
-                                    Contraindictions (Do Not Use Case)
+                                    Contraindications (Do Not Use Case)
                                 </Text>
                                 <Text className="text-black">
-                                    {medication.summary.contraindictions}
+                                    {medication.summary.contraindications}
                                 </Text>
                             </View>
                         </View>
@@ -127,10 +140,16 @@ const Medication: React.FC<PostProps> = ({ medicationIndex, edit }) => {
                     <View className="bg-black p-4 rounded-b-lg">
                         <Text className="text-white mb-3 font-semibold">Ask Dr. Qura for:</Text>
                         <View className="flex-row space-x-4">
-                            <TouchableOpacity className="flex-1 bg-white p-3 rounded-lg justify-center items-center">
+                            <TouchableOpacity
+                                onPress={handleSummary}
+                                className="flex-1 bg-white p-3 rounded-lg justify-center items-center"
+                            >
                                 <Text className="text-black font-bold">Summarization</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity className="flex-1 bg-white p-3 rounded-lg justify-center items-center">
+                            <TouchableOpacity
+                                onPress={handleSentiment}
+                                className="flex-1 bg-white p-3 rounded-lg justify-center items-center"
+                            >
                                 <Text className="text-black font-bold">Internet Sentiment</Text>
                             </TouchableOpacity>
                         </View>
