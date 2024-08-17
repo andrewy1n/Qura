@@ -5,12 +5,6 @@ import { Message, ToolCall } from '../types/Chat';
 import { useChatContext } from '../context/ChatMessagesContext';
 
 export const useChat = () => {
-    const initialMessage: Message = {
-        role: 'tool',
-        content:
-            'Hello! I’ve curated some inquiries for you based on your medication list! Please feel free to check them out below!',
-    };
-
     const { messages, setMessages, addMessage } = useChatContext();
 
     const executeToolCalls = async (toolCalls: ToolCall[]) => {
@@ -44,6 +38,7 @@ export const useChat = () => {
         console.log('Current history:', currentMessages);
 
         let aiMessage = await callGPT(currentMessages);
+        currentMessages = [...currentMessages, aiMessage as Message];
 
         while (aiMessage.tool_calls && aiMessage.tool_calls.length > 0) {
             console.log('Executing tool calls:', aiMessage.tool_calls);
@@ -57,6 +52,7 @@ export const useChat = () => {
 
             aiMessage = await callGPT([...currentMessages, ...toolMessages]);
             console.log('AI response:', aiMessage);
+            currentMessages = [...currentMessages, ...toolMessages, aiMessage as Message];
         }
 
         if (!aiMessage.content) {
@@ -68,7 +64,7 @@ export const useChat = () => {
     };
 
     const resetMessages = () => {
-        setMessages([initialMessage]);
+        setMessages([]);
     };
 
     return { messages, sendMessage, addMessage, resetMessages };
