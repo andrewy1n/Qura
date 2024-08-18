@@ -4,7 +4,7 @@ import { summarizeJSON } from './Summarize';
 export const callTool = async (toolName: string, params: Record<string, any>) => {
     switch (toolName) {
         case 'query_drug_tool':
-            const result = await getDrugInfo(params as { keyword: string });
+            const result = await getDrugInfo(params as { query: string });
             return JSON.stringify(result);
         // Add other tool cases as needed
         default:
@@ -13,10 +13,10 @@ export const callTool = async (toolName: string, params: Record<string, any>) =>
 };
 
 // Example function for querying drug information
-const getDrugInfo = async (params: { keyword: string }) => {
+const getDrugInfo = async (params: { query: string }) => {
     try {
         const response = await axios.get(
-            `https://api.fda.gov/drug/label.json?search=${params.keyword}`
+            `https://api.fda.gov/drug/label.json?search=${params.query}`
         );
         const results = response.data.results;
 
@@ -31,8 +31,10 @@ const getDrugInfo = async (params: { keyword: string }) => {
                 information_for_patients,
                 common_side_effects
             }
+            Data:
             ${JSON.stringify(results)}`;
         const reply = await summarizeJSON(summaryPrompt);
+        console.log('##Drug summary:', reply);
 
         return reply;
     } catch (error) {
