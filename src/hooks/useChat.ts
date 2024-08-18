@@ -2,10 +2,10 @@ import { useState, useCallback } from 'react';
 import { callTool } from '../util/Services/CallTool';
 import { callGPT } from '../util/LLM';
 import { Message, ToolCall } from '../types/Chat';
-import { useChatContext } from '../context/ChatMessagesContext';
+import { initialMessage, useChatContext } from '../context/ChatMessagesContext';
 
 export const useChat = () => {
-    const { messages, setMessages, addMessage } = useChatContext();
+    const { messages, setMessages, addMessage, setIsWaiting } = useChatContext();
 
     const executeToolCalls = async (toolCalls: ToolCall[]) => {
         let returnMessages: Message[] = [];
@@ -30,6 +30,7 @@ export const useChat = () => {
     };
 
     const sendMessage = async (userMessage: string) => {
+        setIsWaiting(true);
         console.log('User message:', userMessage);
 
         let currentMessages = [...messages, { role: 'user', content: userMessage }];
@@ -61,10 +62,11 @@ export const useChat = () => {
         }
 
         addMessage(aiMessage as Message);
+        setIsWaiting(false);
     };
 
     const resetMessages = () => {
-        setMessages([]);
+        setMessages([initialMessage]);
     };
 
     return { messages, sendMessage, addMessage, resetMessages };

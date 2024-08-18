@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, View, Text, TouchableOpacity, TextInput, FlatList } from 'react-native';
+import { Alert, View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { useMedications } from '@/src/hooks/useMedications';
 import { router } from 'expo-router';
 import Medication from '@/src/components/Medication';
@@ -10,7 +10,6 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function Index() {
     const [edit, setEdit] = useState(false);
-    const { searchByNDC } = useMedications();
     const { medicationsList, setMedicationsList } = useMedicationsContext();
 
     const handleOpenModal = () => {
@@ -69,18 +68,24 @@ export default function Index() {
                 </View>
             </View>
             <View className="flex-1 w-full">
-                <FlatList
-                    className="w-full"
-                    data={medicationsList}
-                    keyExtractor={(item) => item.ndc_number}
-                    renderItem={({ index }) => <Medication medicationIndex={index} edit={edit} />}
-                    ItemSeparatorComponent={() => <View className="h-3" />}
-                    contentContainerStyle={{
-                        paddingBottom: 110,
-                        paddingTop: 20,
-                        paddingHorizontal: 20,
-                    }}
-                />
+                {medicationsList ? (
+                    <FlatList
+                        className="w-full"
+                        data={medicationsList}
+                        keyExtractor={(item) => item.ndc_number}
+                        renderItem={({ index }) => (
+                            <Medication medicationIndex={index} edit={edit} />
+                        )}
+                        ItemSeparatorComponent={() => <View className="h-3" />}
+                        contentContainerStyle={{
+                            paddingBottom: 170,
+                            paddingTop: 20,
+                            paddingHorizontal: 20,
+                        }}
+                    />
+                ) : (
+                    <Text className="text-center font-semibold mt-8">No Medications</Text>
+                )}
             </View>
             <TouchableOpacity
                 onPress={handleOpenModal}

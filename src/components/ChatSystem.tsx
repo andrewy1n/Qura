@@ -14,11 +14,13 @@ import SendIcon from '@/assets/images/SendIcon.svg';
 import Dr from '@/assets/images/Dr.svg';
 import { useChat } from '@/hooks/useChat';
 import { Message } from '../types/Chat';
+import { useChatContext } from '../context/ChatMessagesContext';
 import { useMedications } from '@/src/hooks/useMedications';
 import { useMedicationsContext } from '@/src/context/MedicationsContext';
 import Markdown from 'react-native-markdown-display';
 
 export default function ChatSystem() {
+    const { isWaiting } = useChatContext();
     const { messages, sendMessage } = useChat();
     const { createMedPrompt } = useMedications();
     const { medicationsList } = useMedicationsContext();
@@ -51,10 +53,7 @@ export default function ChatSystem() {
 
     useEffect(() => {
         if (flatListRef.current) {
-            flatListRef.current.scrollToOffset({ offset: 0, animated: false });
-            requestAnimationFrame(() => {
-                flatListRef.current?.scrollToEnd({ animated: true });
-            });
+            flatListRef.current.scrollToEnd({ animated: true });
         }
     }, [messages]);
 
@@ -79,7 +78,7 @@ export default function ChatSystem() {
 
         sendMessage(
             createMedPrompt(
-                'Show me all potentPial medicine interaction risks from my list of medication: '
+                'Show me all potential medicine interaction risks from my list of medication: '
             )
         );
     };
@@ -107,7 +106,7 @@ export default function ChatSystem() {
                             className={`max-w-[69%] rounded-lg shadow-md
                                 ${
                                     item.role === 'user'
-                                        ? 'bg-[#C23B22] self-end -mr-0.5'
+                                        ? 'bg-[#C23B22] self-end mr-2'
                                         : 'bg-black self-start'
                                 }
                                 ${index === 0 ? 'px-0' : 'px-3'}
@@ -150,13 +149,26 @@ export default function ChatSystem() {
                 contentContainerStyle={{
                     flexGrow: 1,
                     justifyContent: 'flex-end',
-                    paddingHorizontal: 10,
                     paddingTop: 10,
                 }}
                 ref={flatListRef}
                 onContentSizeChange={() => {
                     flatListRef.current?.scrollToEnd({ animated: true });
                 }}
+                ListFooterComponent={
+                    isWaiting ? (
+                        <View className="flex-row ml-4 items-center">
+                            <Dr width={30} height={30} />
+                            <View className="bg-black w-[10%] p-1 rounded-xl mb-2 ml-4">
+                                <Text className="text-white text-center font-bold text-lg">
+                                    ...
+                                </Text>
+                            </View>
+                        </View>
+                    ) : (
+                        <></>
+                    )
+                }
             />
             <View
                 className={`flex-row items-center mb-20 p-3 ${keyboardVisible ? 'mb-1' : 'mb-20'}`}
