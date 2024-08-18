@@ -64,12 +64,12 @@ const Medication: React.FC<PostProps> = ({ medicationIndex, edit }) => {
     };
 
     const handleSummary = () => {
-        sendMessage(`Give me a summary of ${medication.brand_name}`);
+        sendMessage(`Provide me a summary of ${medication.brand_name}`);
         router.push('/Chat');
     };
 
     const handleSentiment = () => {
-        sendMessage(`Give me the internet's general sentiment about ${medication.brand_name}`);
+        sendMessage(`What are use cases for ${medication.brand_name}`);
         router.push('/Chat');
     };
 
@@ -150,7 +150,7 @@ const Medication: React.FC<PostProps> = ({ medicationIndex, edit }) => {
                                 onPress={handleSentiment}
                                 className="flex-1 bg-white p-3 rounded-lg justify-center items-center"
                             >
-                                <Text className="text-black font-bold">Internet Sentiment</Text>
+                                <Text className="text-black font-bold">Use Cases</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

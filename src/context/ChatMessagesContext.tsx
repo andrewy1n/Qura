@@ -5,6 +5,8 @@ interface ChatContextType {
     messages: Message[];
     setMessages: (messages: Message[]) => void;
     addMessage: (newMessage: Message) => void;
+    isWaiting: boolean;
+    setIsWaiting: (isWaiting: boolean) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -17,6 +19,7 @@ export const initialMessage: Message = {
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const [messages, setMessages] = useState<Message[]>([initialMessage]);
+    const [isWaiting, setIsWaiting] = useState(false);
 
     const addMessage = useCallback((newMessage: Message) => {
         setMessages((prevMessages: Message[]) => [...prevMessages, newMessage]);
@@ -28,6 +31,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
                 messages,
                 setMessages,
                 addMessage,
+                isWaiting,
+                setIsWaiting,
             }}
         >
             {children}

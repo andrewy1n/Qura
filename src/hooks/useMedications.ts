@@ -5,8 +5,6 @@ import { useState } from 'react';
 import axios from 'axios';
 import { Alert } from 'react-native';
 import { summarizeJSON } from '../util/Services/Summarize';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 
 export const useMedications = () => {
     const { medicationsList, setMedicationsList } = useMedicationsContext();
