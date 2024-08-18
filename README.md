@@ -55,4 +55,5 @@
 
 > Curing Doubts, Simplifying Health, Qura. 🌟
 
-by Tommy, Andrew, John, Jamos
+
+**by Tommy, Andrew, John, Jamos**
